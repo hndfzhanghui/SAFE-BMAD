@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>S3DA2 系统监控仪表板</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            font-size: 2rem;
+            font-weight: 300;
+        }
+
+        .status-indicator {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .status-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-healthy {
+            background: #27ae60;
+            color: white;
+        }
+
+        .status-warning {
+            background: #f39c12;
+            color: white;
+        }
+
+        .status-error {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #ecf0f1;
+        }
+
+        .card-title {
+            font-size: 1.3rem;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        .card-icon {
+            font-size: 1.5rem;
+        }
+
+        .metric {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 1rem 0;
+            padding: 0.5rem 0;
+        }
+
+        .metric-label {
+            font-weight: 500;
+            color: #7f8c8d;
+        }
+
+        .metric-value {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .metric-good { color: #27ae60; }
+        .metric-warning { color: #f39c12; }
+        .metric-error { color: #e74c3c; }
+
+        .logs-container {
+            max-height: 300px;
+            overflow-y: auto;
+            background: #2c3e50;
+            border-radius: 8px;
+            padding: 1rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+
+        .log-entry {
+            margin: 0.5rem 0;
+            padding: 0.5rem;
+            border-radius: 4px;
+            border-left: 3px solid #3498db;
+            background: rgba(52, 152, 219, 0.1);
+        }
+
+        .log-error {
+            border-left-color: #e74c3c;
+            background: rgba(231, 76, 60, 0.1);
+        }
+
+        .log-warning {
+            border-left-color: #f39c12;
+            background: rgba(243, 156, 18, 0.1);
+        }
+
+        .log-time {
+            color: #95a5a6;
+            font-size: 0.8rem;
+        }
+
+        .controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: #27ae60;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #229954;
+            transform: translateY(-2px);
+        }
+
+        .btn-warning {
+            background: #f39c12;
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background: #e67e22;
+            transform: translateY(-2px);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #ecf0f1;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 0.5rem 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3498db, #2ecc71);
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+
+        .alert-list {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .alert-item {
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+            border-radius: 8px;
+            border-left: 4px solid #e74c3c;
+            background: rgba(231, 76, 60, 0.1);
+        }
+
+        .alert-item.warning {
+            border-left-color: #f39c12;
+            background: rgba(243, 156, 18, 0.1);
+        }
+
+        .alert-item.info {
+            border-left-color: #3498db;
+            background: rgba(52, 152, 219, 0.1);
+        }
+
+        .refresh-indicator {
+            display: inline-block;
+            margin-left: 0.5rem;
+            font-size: 0.9rem;
+            color: #7f8c8d;
+        }
+
+        .system-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .info-item {
+            text-align: center;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .info-value {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .info-label {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+            margin-top: 0.25rem;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+
+        .updating {
+            animation: pulse 1.5s infinite;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            color: white;
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+                padding: 1rem;
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            .status-indicator {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>🚀 S3DA2 系统监控仪表板</h1>
+        <div class="status-indicator">
+            <span class="status-badge status-healthy" id="system-status">系统健康</span>
+            <span class="refresh-indicator" id="last-update">最后更新: --</span>
+        </div>
+    </header>
+
+    <div class="dashboard">
+        <!-- Story 1.3 状态卡片 -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">📊 Story 1.3 状态</h2>
+                <span class="card-icon" id="story13-icon">🟢</span>
+            </div>
+            <div class="controls">
+                <a href="http://localhost:8000/docs" target="_blank" class="btn btn-primary">📚 API文档</a>
+                <a href="http://localhost:8000/demo.html" target="_blank" class="btn btn-success">🎮 演示页面</a>
+            </div>
+            <div class="metric">
+                <span class="metric-label">服务状态:</span>
+                <span class="metric-value metric-good" id="story13-status">运行中</span>
+            </div>
+            <div class="metric">
+                <span class="metric-label">响应时间:</span>
+                <span class="metric-value metric-good" id="story13-response">正常</span>
+            </div>
+            <div class="metric">
+                <span class="metric-label">端口:</span>
+                <span class="metric-value">8000</span>
+            </div>
+        </div>
+
+        <!-- Story 1.4 状态卡片 -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">📈 Story 1.4 状态</h2>
+                <span class="card-icon" id="story14-icon">🟢</span>
+            </div>
+            <div class="controls">
+                <a href="http://localhost:8001/docs" target="_blank" class="btn btn-primary">📚 监控文档</a>
+                <a href="http://localhost:8001/monitoring/health" target="_blank" class="btn btn-warning">🔍 健康检查</a>
+            </div>
+            <div class="metric">
+                <span class="metric-label">监控状态:</span>
+                <span class="metric-value metric-good" id="story14-status">运行中</span>
+            </div>
+            <div class="metric">
+                <span class="metric-label">日志系统:</span>
+                <span class="metric-value metric-good" id="story14-logging">正常</span>
+            </div>
+            <div class="metric">
+                <span class="metric-label">告警系统:</span>
+                <span class="metric-value metric-good" id="story14-alerting">正常</span>
+            </div>
+        </div>
+
+        <!-- 系统资源卡片 -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">💻 系统资源</h2>
+                <span class="card-icon">📊</span>
+            </div>
+            <div class="metric">
+                <span class="metric-label">CPU使用率:</span>
+                <span class="metric-value" id="cpu-usage">--%</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="cpu-progress" style="width: 0%"></div>
+            </div>
+            <div class="metric">
+                <span class="metric-label">内存使用率:</span>
+                <span class="metric-value" id="memory-usage">--%</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="memory-progress" style="width: 0%"></div>
+            </div>
+            <div class="metric">
+                <span class="metric-label">磁盘使用率:</span>
+                <span class="metric-value" id="disk-usage">--%</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="disk-progress" style="width: 0%"></div>
+            </div>
+        </div>
+
+        <!-- 告警信息卡片 -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">🚨 最近告警</h2>
+                <span class="card-icon">🔔</span>
+            </div>
+            <div class="controls">
+                <button class="btn btn-primary" onclick="testAlerts()">测试告警</button>
+                <button class="btn btn-warning" onclick="clearAlerts()">清除告警</button>
+            </div>
+            <div class="alert-list" id="alerts-container">
+                <div class="alert-item info">
+                    <strong>系统启动</strong>
+                    <br>所有组件已正常启动
+                    <br><small class="log-time">刚刚</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- 系统日志卡片 -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">📝 系统日志</h2>
+                <span class="card-icon">📄</span>
+            </div>
+            <div class="controls">
+                <button class="btn btn-primary" onclick="refreshLogs()">刷新日志</button>
+                <button class="btn btn-warning" onclick="clearLogs()">清除显示</button>
+            </div>
+            <div class="logs-container" id="logs-container">
+                <div class="log-entry">
+                    <span class="log-time">2025-01-21 22:20:00</span>
+                    <br>✅ 系统监控仪表板已启动
+                </div>
+            </div>
+        </div>
+
+        <!-- 系统信息卡片 -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">ℹ️ 系统信息</h2>
+                <span class="card-icon">🔧</span>
+            </div>
+            <div class="system-info">
+                <div class="info-item">
+                    <div class="info-value" id="uptime">--</div>
+                    <div class="info-label">运行时间</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-value" id="total-requests">--</div>
+                    <div class="info-label">总请求数</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-value" id="active-alerts">0</div>
+                    <div class="info-label">活跃告警</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-value" id="log-count">--</div>
+                    <div class="info-label">日志条数</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>S3DA2 - SAFE BMAD 监控系统 | Story 1.3 & 1.4 集成监控</p>
+        <p>最后更新: <span id="footer-time">--</span></p>
+    </footer>
+
+    <script>
+        // 全局变量
+        let totalRequests = 0;
+        let startTime = Date.now();
+        let alertCount = 0;
+
+        // 系统健康检查
+        async function checkSystemHealth() {
+            try {
+                // 检查 Story 1.3
+                const story13Response = await fetch('http://localhost:8000/health');
+                const story13Status = story13Response.ok ? '运行中' : '异常';
+                updateStatus('story13-status', story13Status, story13Response.ok);
+                updateStatus('story13-icon', story13Response.ok ? '🟢' : '🔴');
+
+                // 检查 Story 1.4
+                const story14Response = await fetch('http://localhost:8001/health');
+                const story14Status = story14Response.ok ? '运行中' : '异常';
+                updateStatus('story14-status', story14Status, story14Response.ok);
+                updateStatus('story14-icon', story14Response.ok ? '🟢' : '🔴');
+
+                // 更新系统状态
+                const systemHealthy = story13Response.ok && story14Response.ok;
+                updateSystemStatus(systemHealthy);
+
+                // 更新总请求数
+                totalRequests++;
+                document.getElementById('total-requests').textContent = totalRequests;
+
+            } catch (error) {
+                console.error('健康检查失败:', error);
+                updateStatus('story13-status', '无法连接', false);
+                updateStatus('story14-status', '无法连接', false);
+                updateStatus('story13-icon', '🔴');
+                updateStatus('story14-icon', '🔴');
+                updateSystemStatus(false);
+            }
+        }
+
+        // 检查监控系统详细状态
+        async function checkMonitoringStatus() {
+            try {
+                const response = await fetch('http://localhost:8001/monitoring/health');
+                if (response.ok) {
+                    const data = await response.json();
+
+                    // 更新监控组件状态
+                    if (data.components) {
+                        updateStatus('story14-logging', data.components.logging || '正常', true);
+                        updateStatus('story14-alerting', data.components.alerting || '正常', true);
+                    }
+
+                    // 更新系统指标
+                    if (data.metrics) {
+                        updateMetrics(data.metrics);
+                    }
+                }
+            } catch (error) {
+                console.error('监控状态检查失败:', error);
+            }
+        }
+
+        // 更新指标
+        function updateMetrics(metrics) {
+            // 更新CPU使用率
+            if (metrics.cpu_usage !== undefined) {
+                updateProgressBar('cpu-usage', 'cpu-progress', metrics.cpu_usage);
+            }
+
+            // 更新内存使用率
+            if (metrics.memory_usage !== undefined) {
+                updateProgressBar('memory-usage', 'memory-progress', metrics.memory_usage);
+            }
+
+            // 更新磁盘使用率
+            if (metrics.disk_usage !== undefined) {
+                updateProgressBar('disk-usage', 'disk-progress', metrics.disk_usage);
+            }
+        }
+
+        // 更新进度条
+        function updateProgressBar(textId, progressId, value) {
+            const textElement = document.getElementById(textId);
+            const progressElement = document.getElementById(progressId);
+
+            if (textElement) textElement.textContent = `${value}%`;
+            if (progressElement) {
+                progressElement.style.width = `${value}%`;
+
+                // 根据值改变颜色
+                if (value > 80) {
+                    progressElement.style.background = 'linear-gradient(90deg, #e74c3c, #c0392b)';
+                    if (textElement) textElement.className = 'metric-value metric-error';
+                } else if (value > 60) {
+                    progressElement.style.background = 'linear-gradient(90deg, #f39c12, #e67e22)';
+                    if (textElement) textElement.className = 'metric-value metric-warning';
+                } else {
+                    progressElement.style.background = 'linear-gradient(90deg, #3498db, #2ecc71)';
+                    if (textElement) textElement.className = 'metric-value metric-good';
+                }
+            }
+        }
+
+        // 更新状态
+        function updateStatus(elementId, status, isHealthy) {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.textContent = status;
+                element.className = isHealthy ? 'metric-value metric-good' : 'metric-value metric-error';
+            }
+        }
+
+        // 更新系统状态
+        function updateSystemStatus(isHealthy) {
+            const statusElement = document.getElementById('system-status');
+            if (statusElement) {
+                if (isHealthy) {
+                    statusElement.textContent = '系统健康';
+                    statusElement.className = 'status-badge status-healthy';
+                } else {
+                    statusElement.textContent = '系统异常';
+                    statusElement.className = 'status-badge status-error';
+                }
+            }
+        }
+
+        // 测试告警
+        async function testAlerts() {
+            try {
+                const response = await fetch('http://localhost:8001/demo/alerts', { method: 'POST' });
+                if (response.ok) {
+                    addAlert('info', '测试告警', '告警系统测试成功');
+                } else {
+                    addAlert('warning', '测试告警', '告警系统测试失败');
+                }
+            } catch (error) {
+                addAlert('error', '测试告警', '无法连接到告警系统');
+            }
+        }
+
+        // 添加告警
+        function addAlert(type, title, message) {
+            const alertsContainer = document.getElementById('alerts-container');
+            if (!alertsContainer) return;
+
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert-item ${type}`;
+            alertDiv.innerHTML = `
+                <strong>${title}</strong>
+                <br>${message}
+                <br><small class="log-time">${new Date().toLocaleString()}</small>
+            `;
+
+            alertsContainer.insertBefore(alertDiv, alertsContainer.firstChild);
+
+            // 限制告警数量
+            while (alertsContainer.children.length > 10) {
+                alertsContainer.removeChild(alertsContainer.lastChild);
+            }
+
+            // 更新告警计数
+            alertCount++;
+            document.getElementById('active-alerts').textContent = alertCount;
+        }
+
+        // 清除告警
+        function clearAlerts() {
+            const alertsContainer = document.getElementById('alerts-container');
+            if (alertsContainer) {
+                alertsContainer.innerHTML = `
+                    <div class="alert-item info">
+                        <strong>告警已清除</strong>
+                        <br>所有告警已被用户清除
+                        <br><small class="log-time">${new Date().toLocaleString()}</small>
+                    </div>
+                `;
+                alertCount = 0;
+                document.getElementById('active-alerts').textContent = alertCount;
+            }
+        }
+
+        // 刷新日志
+        async function refreshLogs() {
+            addLog('info', '📊 正在刷新系统状态...');
+            await checkSystemHealth();
+            await checkMonitoringStatus();
+            updateSystemInfo();
+            addLog('success', '✅ 系统状态已更新');
+        }
+
+        // 添加日志
+        function addLog(type, message) {
+            const logsContainer = document.getElementById('logs-container');
+            if (!logsContainer) return;
+
+            const logDiv = document.createElement('div');
+            logDiv.className = `log-entry ${type === 'error' ? 'log-error' : type === 'warning' ? 'log-warning' : ''}`;
+            logDiv.innerHTML = `
+                <span class="log-time">${new Date().toLocaleString()}</span>
+                <br>${message}
+            `;
+
+            logsContainer.insertBefore(logDiv, logsContainer.firstChild);
+
+            // 限制日志数量
+            while (logsContainer.children.length > 50) {
+                logsContainer.removeChild(logsContainer.lastChild);
+            }
+
+            // 更新日志计数
+            const logCount = logsContainer.children.length;
+            document.getElementById('log-count').textContent = logCount;
+        }
+
+        // 清除日志显示
+        function clearLogs() {
+            const logsContainer = document.getElementById('logs-container');
+            if (logsContainer) {
+                logsContainer.innerHTML = `
+                    <div class="log-entry">
+                        <span class="log-time">${new Date().toLocaleString()}</span>
+                        <br>📝 日志显示已清除
+                    </div>
+                `;
+                document.getElementById('log-count').textContent = '1';
+            }
+        }
+
+        // 更新系统信息
+        function updateSystemInfo() {
+            // 更新运行时间
+            const uptime = Date.now() - startTime;
+            const hours = Math.floor(uptime / 3600000);
+            const minutes = Math.floor((uptime % 3600000) / 60000);
+            const seconds = Math.floor((uptime % 60000) / 1000);
+
+            let uptimeText = '';
+            if (hours > 0) uptimeText += `${hours}时 `;
+            if (minutes > 0) uptimeText += `${minutes}分 `;
+            uptimeText += `${seconds}秒`;
+
+            document.getElementById('uptime').textContent = uptimeText;
+
+            // 更新最后更新时间
+            const now = new Date().toLocaleString();
+            document.getElementById('last-update').textContent = `最后更新: ${now}`;
+            document.getElementById('footer-time').textContent = now;
+        }
+
+        // 模拟系统资源数据
+        function simulateSystemMetrics() {
+            // 模拟CPU使用率 (20-80%)
+            const cpuUsage = Math.floor(Math.random() * 60) + 20;
+            updateProgressBar('cpu-usage', 'cpu-progress', cpuUsage);
+
+            // 模拟内存使用率 (30-70%)
+            const memoryUsage = Math.floor(Math.random() * 40) + 30;
+            updateProgressBar('memory-usage', 'memory-progress', memoryUsage);
+
+            // 模拟磁盘使用率 (40-90%)
+            const diskUsage = Math.floor(Math.random() * 50) + 40;
+            updateProgressBar('disk-usage', 'disk-progress', diskUsage);
+        }
+
+        // 主更新循环
+        async function updateDashboard() {
+            // 添加更新动画
+            document.body.classList.add('updating');
+
+            try {
+                await checkSystemHealth();
+                await checkMonitoringStatus();
+                updateSystemInfo();
+                simulateSystemMetrics();
+            } catch (error) {
+                console.error('仪表板更新失败:', error);
+                addLog('error', '❌ 仪表板更新失败: ' + error.message);
+            } finally {
+                // 移除更新动画
+                setTimeout(() => {
+                    document.body.classList.remove('updating');
+                }, 500);
+            }
+        }
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            addLog('info', '🚀 S3DA2 系统监控仪表板启动中...');
+
+            // 立即执行一次更新
+            updateDashboard().then(() => {
+                addLog('success', '✅ 系统监控仪表板已启动');
+                addAlert('info', '系统启动', '所有监控组件已正常启动');
+            });
+
+            // 设置定期更新
+            setInterval(updateDashboard, 10000); // 每10秒更新一次
+
+            // 更新页脚时间
+            setInterval(() => {
+                document.getElementById('footer-time').textContent = new Date().toLocaleString();
+            }, 1000);
+        });
+
+        // 错误处理
+        window.addEventListener('error', function(event) {
+            addLog('error', '❌ 页面错误: ' + event.message);
+        });
+
+        // 网络状态监听
+        window.addEventListener('online', function() {
+            addLog('success', '🌐 网络连接已恢复');
+        });
+
+        window.addEventListener('offline', function() {
+            addLog('warning', '📡 网络连接已断开');
+        });
+    </script>
+</body>
+</html>
