@@ -17,7 +17,7 @@ S3DA2/
 │
 ├── core/                               # 核心AI引擎代码
 │   ├── __init__.py
-│   ├── agents/                         # S-A-F-E-E Agent实现
+│   ├── agents/                         # S-A-F-E-R Agent实现
 │   │   ├── __init__.py
 │   │   ├── base/                       # 基础Agent类
 │   │   │   ├── __init__.py
@@ -192,6 +192,16 @@ S3DA2/
     ├── README.md                       # 文档索引
     ├── development.md                  # 开发指南
     ├── project-structure.md            # 项目结构说明
+    ├── prd.md                          # 产品需求文档
+    ├── epics/                          # Epic规格文档
+    │   ├── epic-1-foundation.md
+    │   ├── epic-2-core-agents.md
+    │   ├── epic-3-simulation.md
+    │   ├── epic-4-ui-development.md
+    │   ├── epic-5-review-system.md
+    │   ├── epic-6-integration.md
+    │   ├── epic-7-embedded-ui.md
+    │   └── epic-8-optimization.md
     ├── api/                            # API文档
     │   └── README.md
     ├── architecture/                   # 架构文档
@@ -210,7 +220,7 @@ S3DA2/
 ## 核心模块说明
 
 ### 1. Core 模块
-负责实现 S-A-F-E-E Agent 框架的核心逻辑：
+负责实现 S-A-F-E-R Agent 框架的核心逻辑：
 - **Agents**: 各类 Agent 的具体实现
 - **Orchestrator**: Agent 协调和执行引擎
 - **Models**: 数据模型和业务实体

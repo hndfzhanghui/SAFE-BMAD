@@ -133,7 +133,7 @@ npm run type-check
 ```
 feat(core): add SAFE agent implementation
 
-Implement the basic S-A-F-E-E agent framework with
+Implement the basic S-A-F-E-R agent framework with
 orchestration capabilities.
 
 Closes #123

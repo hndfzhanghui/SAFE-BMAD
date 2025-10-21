@@ -50,7 +50,7 @@ recommendations:
     - action: "Add integration tests for Docker setup"
       refs: ["docker-compose.yml", "tests/integration/"]
   future:
-    - action: "Create comprehensive test suite for S-A-F-E-E agent framework"
+    - action: "Create comprehensive test suite for S-A-F-E-R agent framework"
       refs: ["core/agents/", "tests/unit/core/"]
     - action: "Add e2e tests for complete development workflow"
       refs: ["tests/e2e/"]

@@ -268,7 +268,7 @@ SAFE系统的整体用户体验愿景是：**"智能协作，决策无忧"**。�
 ```
 safe-emergency-system/
 ├── core/                   # 核心AI引擎
-│   ├── agents/            # S-A-F-E-E Agent实现
+│   ├── agents/            # S-A-F-E-R Agent实现
 │   ├── orchestrator/      # Agent协调器
 │   └── models/           # 数据模型
 ├── api/                   # FastAPI接口层
@@ -474,14 +474,14 @@ class SAFESystem:
 ## Epic 详细信息
 
 每个Epic的详细规格文档请参考：
-- [Epic 1: 基础框架搭建](epic-1-foundation.md)
-- [Epic 2: 核心Agent框架开发](epic-2-core-agents.md)
-- [Epic 3: 模拟数据和基础分析能力](epic-3-simulation.md)
-- [Epic 4: 用户界面开发](epic-4-ui-development.md)
-- [Epic 5: R-Agent复盘系统](epic-5-review-system.md)
-- [Epic 6: 外部系统集成](epic-6-integration.md)
-- [Epic 7: 嵌入式界面和高级功能](epic-7-embedded-ui.md)
-- [Epic 8: 性能优化和扩展](epic-8-optimization.md)
+- [Epic 1: 基础框架搭建](epics/epic-1-foundation.md)
+- [Epic 2: 核心Agent框架开发](epics/epic-2-core-agents.md)
+- [Epic 3: 模拟数据和基础分析能力](epics/epic-3-simulation.md)
+- [Epic 4: 用户界面开发](epics/epic-4-ui-development.md)
+- [Epic 5: R-Agent复盘系统](epics/epic-5-review-system.md)
+- [Epic 6: 外部系统集成](epics/epic-6-integration.md)
+- [Epic 7: 嵌入式界面和高级功能](epics/epic-7-embedded-ui.md)
+- [Epic 8: 性能优化和扩展](epics/epic-8-optimization.md)
 
 ## 变更日志
 

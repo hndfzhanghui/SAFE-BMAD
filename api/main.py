@@ -1,6 +1,6 @@
 """
 FastAPI Main Application for SAFE-BMAD System
-S3DA2 - SAFE BMAD System with S-A-F-E-E Agent Framework
+S3DA2 - SAFE BMAD System with S-A-F-E-R Agent Framework
 """
 
 from fastapi import FastAPI, HTTPException, Depends
@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 # Create FastAPI application
 app = FastAPI(
     title="S3DA2 - SAFE BMAD System API",
-    description="S3DA2 SAFE BMAD System with S-A-F-E-E Agent Framework",
+    description="S3DA2 SAFE BMAD System with S-A-F-E-R Agent Framework",
     version="1.0.0",
     docs_url="/docs",
     redoc_url="/redoc",

@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "safe-bmad"
 version = "0.1.0"
-description = "S3DA2 - SAFE BMAD System with S-A-F-E-E Agent Framework"
+description = "S3DA2 - SAFE BMAD System with S-A-F-E-R Agent Framework"
 authors = ["SAFE-BMAD Team <team@safe-bmad.com>"]
 readme = "README.md"
 packages = [{include = "core"}]
