@@ -1,0 +1,82 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15
+    container_name: safe-bmad-db
+    environment:
+      POSTGRES_DB: safe_bmad
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./config/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: safe-bmad-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # FastAPI Backend
+  api:
+    build:
+      context: .
+      dockerfile: config/Dockerfile.api
+    container_name: safe-bmad-api
+    environment:
+      DATABASE_URL: postgresql://postgres:password@postgres:5432/safe_bmad
+      REDIS_URL: redis://redis:6379/0
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./core:/app/core
+      - ./api:/app/api
+      - ./shared:/app/shared
+      - ./config:/app/config
+    command: uvicorn api.main:app --host 0.0.0.0 --port 8000 --reload
+
+  # Vue.js Frontend
+  ui:
+    build:
+      context: ./ui
+      dockerfile: ../config/Dockerfile.ui
+    container_name: safe-bmad-ui
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+    volumes:
+      - ./ui/src:/app/src
+      - ./ui/public:/app/public
+      - ./ui/package.json:/app/package.json
+    command: npm run dev
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  default:
+    name: safe-bmad-network

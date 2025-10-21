@@ -1,0 +1,69 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
+        args: ['--maxkb=1000']
+      - id: check-merge-conflict
+      - id: debug-statements
+
+  - repo: https://github.com/psf/black
+    rev: 23.11.0
+    hooks:
+      - id: black
+        language_version: python3
+        files: ^core/|^api/|^shared/|^tests/
+
+  - repo: https://github.com/pycqa/isort
+    rev: 5.12.0
+    hooks:
+      - id: isort
+        files: ^core/|^api/|^shared/|^tests/
+
+  - repo: https://github.com/pycqa/flake8
+    rev: 6.1.0
+    hooks:
+      - id: flake8
+        files: ^core/|^api/|^shared/|^tests/
+        args: [--max-line-length=88, --extend-ignore=E203,W503]
+
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: v3.1.0
+    hooks:
+      - id: prettier
+        files: ^ui/|.*\.md$|.*\.yml$|.*\.yaml$
+        additional_dependencies:
+          - prettier@3.1.0
+
+  - repo: https://github.com/pre-commit/mirrors-eslint
+    rev: v8.54.0
+    hooks:
+      - id: eslint
+        files: ^ui/
+        types: [file]
+        types_or: [javascript, jsx, ts, tsx, vue]
+        additional_dependencies:
+          - eslint@8.54.0
+          - "@typescript-eslint/eslint-plugin@6.13.1"
+          - "@typescript-eslint/parser@6.13.1"
+          - eslint-plugin-vue@9.18.1"
+
+  - repo: local
+    hooks:
+      - id: mypy
+        name: mypy
+        entry: mypy
+        language: system
+        files: ^core/|^api/|^shared/
+        pass_filenames: true
+
+      - id: pytest-check
+        name: pytest-check
+        entry: pytest
+        language: system
+        pass_filenames: false
+        always_run: true
+        args: [tests/unit/, -v]

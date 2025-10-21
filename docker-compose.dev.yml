@@ -1,0 +1,154 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database for Development
+  postgres:
+    image: postgres:15
+    container_name: safe-bmad-db-dev
+    environment:
+      POSTGRES_DB: safe_dev
+      POSTGRES_USER: safe_user
+      POSTGRES_PASSWORD: safe_password
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+      - ./config/migrations:/docker-entrypoint-initdb.d
+      - ./config/postgres-dev.conf:/etc/postgresql/postgresql.conf
+    command: postgres -c config_file=/etc/postgresql/postgresql.conf
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U safe_user -d safe_dev"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 30s
+    networks:
+      - safe-bmad-dev-network
+
+  # Redis Cache for Development
+  redis:
+    image: redis:7-alpine
+    container_name: safe-bmad-redis-dev
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_dev_data:/data
+      - ./config/redis-dev.conf:/usr/local/etc/redis/redis.conf
+    command: redis-server /usr/local/etc/redis/redis.conf
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+    networks:
+      - safe-bmad-dev-network
+
+  # FastAPI Backend for Development
+  api:
+    build:
+      context: .
+      dockerfile: config/Dockerfile.dev
+    container_name: safe-bmad-api-dev
+    environment:
+      - DATABASE_URL=postgresql://safe_user:safe_password@postgres:5432/safe_dev
+      - REDIS_URL=redis://redis:6379/0
+      - API_HOST=0.0.0.0
+      - API_PORT=8000
+      - DEBUG=true
+      - RELOAD=true
+      - LOG_LEVEL=DEBUG
+      - ENVIRONMENT=development
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./core:/app/core
+      - ./api:/app/api
+      - ./shared:/app/shared
+      - ./config:/app/config
+      - ./tests:/app/tests
+      - ./logs:/app/logs
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - safe-bmad-dev-network
+    command: uvicorn api.main:app --host 0.0.0.0 --port 8000 --reload --log-level debug
+
+  # Vue.js Frontend for Development
+  ui:
+    build:
+      context: ./ui
+      dockerfile: ../config/Dockerfile.dev
+    container_name: safe-bmad-ui-dev
+    environment:
+      - VITE_API_BASE_URL=http://localhost:8000
+      - VITE_ENVIRONMENT=development
+      - VITE_RELOAD=true
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./ui/src:/app/src
+      - ./ui/public:/app/public
+      - ./ui/package.json:/app/package.json
+      - ./ui/vite.config.ts:/app/vite.config.ts
+      - ./ui/tsconfig.json:/app/tsconfig.json
+      - ./ui/.eslintrc.cjs:/app/.eslintrc.cjs
+    depends_on:
+      - api
+    networks:
+      - safe-bmad-dev-network
+    command: npm run dev -- --host 0.0.0.0
+
+  # Database Admin Interface (Optional for Development)
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: safe-bmad-pgadmin-dev
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@safe-bmad.dev
+      PGADMIN_DEFAULT_PASSWORD: admin123
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      - postgres
+    networks:
+      - safe-bmad-dev-network
+
+  # Redis Admin Interface (Optional for Development)
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: safe-bmad-redis-commander-dev
+    environment:
+      REDIS_HOSTS: local:redis:6379
+      HTTP_USER: admin
+      HTTP_PASSWORD: admin123
+    ports:
+      - "8081:8081"
+    depends_on:
+      - redis
+    networks:
+      - safe-bmad-dev-network
+
+volumes:
+  postgres_dev_data:
+    driver: local
+  redis_dev_data:
+    driver: local
+  pgadmin_data:
+    driver: local
+
+networks:
+  safe-bmad-dev-network:
+    driver: bridge

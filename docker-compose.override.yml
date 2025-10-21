@@ -1,0 +1,86 @@
+# Docker Compose override file for local development
+# This file automatically applies when running `docker-compose up`
+# and overrides values in docker-compose.yml
+
+version: '3.8'
+
+services:
+  postgres:
+    # Use development database name and credentials
+    environment:
+      POSTGRES_DB: safe_dev
+      POSTGRES_USER: safe_user
+      POSTGRES_PASSWORD: safe_password
+    # Add development-specific volume for easier data access
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+      - ./config/init-dev.sql:/docker-entrypoint-initdb.d/init-dev.sql
+    # Enable logging for debugging
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  redis:
+    # Enable AOF persistence for development
+    command: redis-server --appendonly yes --requirepass dev_redis_password
+    volumes:
+      - redis_dev_data:/data
+    # Enable logging for debugging
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  api:
+    # Development environment variables
+    environment:
+      - DATABASE_URL=postgresql://safe_user:safe_password@postgres:5432/safe_dev
+      - REDIS_URL=redis://:dev_redis_password@redis:6379/0
+      - DEBUG=true
+      - RELOAD=true
+      - LOG_LEVEL=DEBUG
+      - ENVIRONMENT=development
+    # Development-specific volume mounts for hot reloading
+    volumes:
+      - ./core:/app/core
+      - ./api:/app/api
+      - ./shared:/app/shared
+      - ./config:/app/config
+      - ./logs:/app/logs
+      - /app/__pycache__ # Exclude __pycache__ for performance
+    # Enable more verbose logging
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  ui:
+    # Development environment variables
+    environment:
+      - VITE_API_BASE_URL=http://localhost:8000
+      - VITE_ENVIRONMENT=development
+    # Development-specific volume mounts
+    volumes:
+      - ./ui/src:/app/src
+      - ./ui/public:/app/public
+      - ./ui/package.json:/app/package.json
+      - ./ui/vite.config.ts:/app/vite.config.ts
+      - ./ui/tsconfig.json:/app/tsconfig.json
+      - /app/node_modules # Exclude node_modules for performance
+    # Enable verbose logging
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+# Development-specific volumes
+volumes:
+  postgres_dev_data:
+    driver: local
+  redis_dev_data:
+    driver: local

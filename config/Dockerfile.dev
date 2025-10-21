@@ -1,0 +1,53 @@
+FROM python:3.9-slim
+
+WORKDIR /app
+
+# Install system dependencies for development
+RUN apt-get update && apt-get install -y \
+    gcc \
+    g++ \
+    libpq-dev \
+    curl \
+    git \
+    vim \
+    netcat-traditional \
+    postgresql-client \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Python dependencies management tools
+RUN pip install --no-cache-dir \
+    poetry==1.7.1 \
+    pip==23.3.1
+
+# Copy Poetry configuration files
+COPY pyproject.toml poetry.lock* ./
+
+# Configure Poetry
+RUN poetry config virtualenvs.create false
+
+# Install Python dependencies
+RUN poetry install --no-interaction --no-ansi
+
+# Copy application code
+COPY core/ ./core/
+COPY api/ ./api/
+COPY shared/ ./shared/
+COPY config/ ./config/
+
+# Create logs directory
+RUN mkdir -p logs
+
+# Create non-root user for security
+RUN useradd --create-home --shell /bin/bash developer
+RUN chown -R developer:developer /app
+USER developer
+
+# Expose port
+EXPOSE 8000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=30s --start-period=40s --retries=3 \
+    CMD curl -f http://localhost:8000/health || exit 1
+
+# Default command for development
+CMD ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload", "--log-level", "debug"]
