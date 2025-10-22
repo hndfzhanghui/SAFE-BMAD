@@ -1,0 +1,266 @@
+# LLM提供商配置文件
+# 用于管理不同LLM提供商的配置和模型信息
+
+# DeepSeek配置
+deepseek:
+  default_adapter: "deepseek_main"
+  adapters:
+    deepseek_main:
+      provider: "deepseek"
+      model: "deepseek-chat"
+      api_base: "https://api.deepseek.com/v1"
+      temperature: 0.7
+      max_tokens: 4000
+      timeout: 30
+      retry_count: 3
+      capabilities:
+        - "text_generation"
+        - "analysis"
+        - "reasoning"
+        - "conversation"
+        - "code_generation"
+        - "streaming"
+      description: "DeepSeek Chat Main Model"
+    deepseek_coder:
+      provider: "deepseek"
+      model: "deepseek-coder"
+      api_base: "https://api.deepseek.com/v1"
+      temperature: 0.1
+      max_tokens: 4096
+      timeout: 30
+      retry_count: 3
+      capabilities:
+        - "code_generation"
+        - "analysis"
+        - "reasoning"
+        - "function_calling"
+        - "tool_calling"
+      description: "DeepSeek Coder Model"
+
+# OpenAI配置
+openai:
+  default_adapter: "gpt4"
+  adapters:
+    gpt4:
+      provider: "openai"
+      model: "gpt-4"
+      api_base: "https://api.openai.com/v1"
+      temperature: 0.7
+      max_tokens: 8192
+      timeout: 60
+      retry_count: 3
+      capabilities:
+        - "text_generation"
+        - "analysis"
+        - "reasoning"
+        - "conversation"
+        - "function_calling"
+        - "json_mode"
+      description: "OpenAI GPT-4"
+    gpt4_turbo:
+      provider: "openai"
+      model: "gpt-4-turbo"
+      api_base: "https://api.openai.com/v1"
+      temperature: 0.7
+      max_tokens: 4096
+      timeout: 60
+      retry_count: 3
+      capabilities:
+        - "text_generation"
+        - "analysis"
+        - "reasoning"
+        - "conversation"
+        - "function_calling"
+        - "json_mode"
+        - "streaming"
+      description: "OpenAI GPT-4 Turbo"
+    gpt35_turbo:
+      provider: "openai"
+      model: "gpt-3.5-turbo"
+      api_base: "https://api.openai.com/v1"
+      temperature: 0.7
+      max_tokens: 4096
+      timeout: 30
+      retry_count: 3
+      capabilities:
+        - "text_generation"
+        - "conversation"
+        - "function_calling"
+        - "streaming"
+      description: "OpenAI GPT-3.5 Turbo"
+
+# 本地模型配置
+local:
+  default_adapter: "local_main"
+  adapters:
+    local_main:
+      provider: "local"
+      model: "local-chat"
+      api_base: "http://localhost:8080/v1"
+      temperature: 0.7
+      max_tokens: 4096
+      timeout: 60
+      retry_count: 3
+      capabilities:
+        - "text_generation"
+        - "analysis"
+        - "reasoning"
+        - "conversation"
+        - "streaming"
+      description: "本地主模型"
+    local_code:
+      provider: "local"
+      model: "local-coder"
+      api_base: "http://localhost:8080/v1"
+      temperature: 0.1
+      max_tokens: 4096
+      timeout: 60
+      retry_count: 3
+      capabilities:
+        - "code_generation"
+        - "analysis"
+        - "reasoning"
+        - "function_calling"
+        - "tool_calling"
+      description: "本地编程模型"
+
+# GLM (Zhipu AI)配置
+glm:
+  default_adapter: "glm4_main"
+  adapters:
+    glm4_main:
+      provider: "glm"
+      model: "glm-4"
+      api_base: "https://open.bigmodel.cn/api/paas/v4"
+      temperature: 0.7
+      max_tokens: 8192
+      timeout: 60
+      retry_count: 3
+      capabilities:
+        - "text_generation"
+        - "code_generation"
+        - "analysis"
+        - "reasoning"
+        - "conversation"
+        - "function_calling"
+        - "tool_calling"
+        - "json_mode"
+        - "streaming"
+      description: "GLM-4 - 最新一代智谱AI模型"
+    glm3_turbo:
+      provider: "glm"
+      model: "glm-3-turbo"
+      api_base: "https://open.bigmodel.cn/api/paas/v4"
+      temperature: 0.7
+      max_tokens: 4096
+      timeout: 30
+      retry_count: 3
+      capabilities:
+        - "text_generation"
+        - "conversation"
+        - "streaming"
+      description: "GLM-3 Turbo - 高效快速响应模型"
+    glm4v:
+      provider: "glm"
+      model: "glm-4v"
+      api_base: "https://open.bigmodel.cn/api/paas/v4"
+      temperature: 0.7
+      max_tokens: 8192
+      timeout: 60
+      retry_count: 3
+      capabilities:
+        - "text_generation"
+        - "multimodal"
+        - "analysis"
+        - "conversation"
+        - "streaming"
+      description: "GLM-4V - 多模态视觉模型"
+    glm4_long:
+      provider: "glm"
+      model: "glm-4-long"
+      api_base: "https://open.bigmodel.cn/api/paas/v4"
+      temperature: 0.7
+      max_tokens: 32768
+      timeout: 90
+      retry_count: 3
+      capabilities:
+        - "text_generation"
+        - "analysis"
+        - "reasoning"
+        - "conversation"
+        - "streaming"
+      description: "GLM-4 Long - 长上下文扩展模型"
+
+# Anthropic配置 (待实现)
+anthropic:
+  default_adapter: "claude_main"
+  adapters:
+    claude_main:
+      provider: "anthropic"
+      model: "claude-3-opus-20240229"
+      api_base: "https://api.anthropic.com/v1"
+      temperature: 0.7
+      max_tokens: 4096
+      timeout: 60
+      retry_count: 3
+      capabilities:
+        - "text_generation"
+        - "analysis"
+        - "reasoning"
+        - "conversation"
+        - "streaming"
+      description: "Anthropic Claude 3.5"
+
+# Google配置 (待实现)
+google:
+  default_adapter: "gemini_main"
+  adapters:
+    gemini_main:
+      provider: "google"
+      model: "gemini-pro"
+      api_base: "https://generativelanguage.googleapis.com/v1"
+      temperature: 0.7
+      max_tokens: 4096
+      timeout: 60
+      retry_count: 3
+      capabilities:
+        - "text_generation"
+        - "analysis"
+        - "reasoning"
+        - "conversation"
+        - "multimodal"
+        - "function_calling"
+      description: "Google Gemini Pro"
+
+# 模型能力映射
+model_capabilities:
+  text_generation:
+    description: "文本生成"
+    providers: ["deepseek", "openai", "local", "anthropic", "google", "glm"]
+  analysis:
+    description: "数据分析"
+    providers: ["deepseek", "openai", "local", "anthropic", "google", "glm"]
+  reasoning:
+    description: "逻辑推理"
+    providers: ["deepseek", "openai", "anthropic", "google", "glm"]
+  conversation:
+    description: "对话能力"
+    providers: ["deepseek", "openai", "local", "anthropic", "google", "glm"]
+  code_generation:
+    description: "代码生成"
+    providers: ["deepseek", "openai", "local", "glm"]
+  function_calling:
+    description: "函数调用"
+    providers: ["deepseek", "openai", "glm"]
+  tool_calling:
+    description: "工具调用"
+    providers: ["deepseek", "openai", "local", "glm"]
+  streaming:
+    description: "流式输出"
+    providers: ["deepseek", "openai", "local", "glm"]
+  multimodal:
+    description: "多模态能力"
+    providers: ["google", "glm"]
+  json_mode:
+    description: "JSON模式"
+    providers: ["openai", "glm"]

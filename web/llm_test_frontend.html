@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LLM API 测试平台</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+            min-height: 85vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            display: flex;
+            flex: 1;
+            min-height: 0;
+        }
+
+        .sidebar {
+            width: 350px;
+            background: #f8f9fa;
+            border-right: 1px solid #e9ecef;
+            padding: 30px 20px;
+            overflow-y: auto;
+        }
+
+        .chat-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: white;
+        }
+
+        .api-selector {
+            margin-bottom: 30px;
+        }
+
+        .api-selector h3 {
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .api-selector select {
+            width: 100%;
+            padding: 12px;
+            font-size: 1em;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .api-selector select:focus {
+            border-color: #4facfe;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+        }
+
+        .connection-status {
+            margin-bottom: 30px;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .status-disconnected {
+            background: #fee;
+            border: 1px solid #fcc;
+            color: #c00;
+        }
+
+        .status-connecting {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+        }
+
+        .status-connected {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .model-info {
+            background: #e3f2fd;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .model-info h4 {
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .stat-item {
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-item .value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #4facfe;
+        }
+
+        .stat-item .label {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: #fafbfc;
+        }
+
+        .chat-messages::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .chat-messages::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+
+        .message {
+            margin-bottom: 20px;
+            display: flex;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.user {
+            justify-content: flex-end;
+        }
+
+        .message.assistant {
+            justify-content: flex-start;
+        }
+
+        .message-content {
+            max-width: 70%;
+            padding: 15px 20px;
+            border-radius: 18px;
+            font-size: 1em;
+            line-height: 1.5;
+            position: relative;
+        }
+
+        .message.user .message-content {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-bottom-right-radius: 5px;
+        }
+
+        .message.assistant .message-content {
+            background: white;
+            border: 1px solid #e9ecef;
+            color: #2c3e50;
+            border-bottom-left-radius: 5px;
+        }
+
+        .message-info {
+            font-size: 0.8em;
+            color: #666;
+            margin-bottom: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chat-input {
+            background: white;
+            border-top: 1px solid #e9ecef;
+            padding: 20px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .input-group {
+            flex: 1;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .chat-input input {
+            flex: 1;
+            padding: 15px;
+            font-size: 1em;
+            border: 2px solid #ddd;
+            border-radius: 25px;
+            transition: all 0.3s;
+        }
+
+        .chat-input input:focus {
+            border-color: #4facfe;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+        }
+
+        .btn {
+            padding: 15px 25px;
+            font-size: 1em;
+            font-weight: 600;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(79, 172, 254, 0.3);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #fff;
+            border-radius: 50%;
+            border-top: 2px solid transparent;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .test-section {
+            margin-bottom: 25px;
+        }
+
+        .test-section h4 {
+            font-size: 1.1em;
+            margin-bottom: 10px;
+            color: #495057;
+        }
+
+        .test-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .test-btn {
+            padding: 10px;
+            font-size: 0.9em;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .test-btn:hover {
+            background: #f8f9fa;
+            border-color: #4facfe;
+        }
+
+        .response-time {
+            font-size: 0.8em;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .clear-btn {
+            background: #dc3545;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 15px;
+            font-size: 0.8em;
+            cursor: pointer;
+            border: none;
+            margin-left: auto;
+        }
+
+        .clear-btn:hover {
+            background: #c82333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 LLM API 测试平台</h1>
+            <p>支持 DeepSeek、GLM、OpenAI 等多个大模型提供商</p>
+        </div>
+
+        <div class="main-content">
+            <div class="sidebar">
+                <!-- API选择器 -->
+                <div class="api-selector">
+                    <h3>
+                        🎯 选择LLM提供商
+                    </h3>
+                    <select id="providerSelect">
+                        <option value="deepseek">DeepSeek (深度求索)</option>
+                        <option value="glm">GLM (智谱AI)</option>
+                        <option value="openai">OpenAI (GPT)</option>
+                        <option value="local">Local Model</option>
+                    </select>
+                </div>
+
+                <!-- 连接状态 -->
+                <div id="connectionStatus" class="connection-status status-disconnected">
+                    🔌 未连接
+                </div>
+
+                <!-- 模型信息 -->
+                <div id="modelInfo" class="model-info" style="display: none;">
+                    <h4 id="modelTitle">模型信息</h4>
+                    <div class="stats">
+                        <div class="stat-item">
+                            <div class="value" id="responseTime">-</div>
+                            <div class="label">响应时间(秒)</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="value" id="totalTokens">-</div>
+                            <div class="label">总Token数</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 测试功能 -->
+                <div class="test-section">
+                    <h4>🧪 快速测试</h4>
+                    <div class="test-buttons">
+                        <button class="test-btn" onclick="testConnection()">🔗 测试连接</button>
+                        <button class="test-btn" onclick="testReasoning()">🧠 测试推理</button>
+                        <button class="test-btn" onclick="testCodeGeneration()">💻 测试代码生成</button>
+                        <button class="test-btn" onclick="testConversation()">💬 测试对话</button>
+                    </div>
+                </div>
+
+                <!-- 清理按钮 -->
+                <button class="clear-btn" onclick="clearChat()">🗑️ 清空对话</button>
+            </div>
+
+            <div class="chat-area">
+                <!-- 聊天消息区域 -->
+                <div id="chatMessages" class="chat-messages">
+                    <div class="message assistant">
+                        <div class="message-info">
+                            <span>🤖 LLM助手</span>
+                            <span>欢迎使用LLM测试平台！</span>
+                        </div>
+                        <div class="message-content">
+                            👋 您好！欢迎使用LLM API测试平台。<br><br>
+                            🎯 请从左侧选择您想要测试的LLM提供商<br>
+                            🔗 然后点击"测试连接"按钮验证API连接<br>
+                            💬 连接成功后，您可以在下方输入消息与AI助手对话<br><br>
+                            📊 平台会实时显示响应时间、Token使用量等统计信息<br><br>
+                            🚀 让我们开始测试吧！
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 聊天输入区域 -->
+                <div class="chat-input">
+                    <div class="input-group">
+                        <input
+                            type="text"
+                            id="messageInput"
+                            placeholder="请输入您的消息..."
+                            onkeypress="handleKeyPress(event)"
+                            disabled
+                        >
+                        <button
+                            id="sendButton"
+                            class="btn btn-primary"
+                            onclick="sendMessage()"
+                            disabled
+                        >
+                            <span id="sendButtonText">发送</span>
+                            <span id="sendLoading" class="loading" style="display: none;"></span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 全局状态
+        let currentProvider = null;
+        let isConnected = false;
+        let conversationHistory = [];
+        let manager = null;
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 LLM测试平台加载完成');
+            updateConnectionStatus('disconnected');
+        });
+
+        // 处理提供商选择变化
+        document.getElementById('providerSelect').addEventListener('change', async function() {
+            const provider = this.value;
+            console.log('🎯 选择提供商:', provider);
+            await switchProvider(provider);
+        });
+
+        // 切换提供商
+        async function switchProvider(provider) {
+            currentProvider = provider;
+            isConnected = false;
+            updateConnectionStatus('disconnected');
+            document.getElementById('messageInput').disabled = true;
+            document.getElementById('sendButton').disabled = true;
+
+            // 清空对话历史
+            conversationHistory = [];
+
+            // 显示提供商信息
+            showProviderInfo(provider);
+        }
+
+        // 显示提供商信息
+        function showProviderInfo(provider) {
+            const modelInfo = document.getElementById('modelInfo');
+            const modelTitle = document.getElementById('modelTitle');
+
+            const providerInfo = {
+                'deepseek': {
+                    name: 'DeepSeek',
+                    models: ['deepseek-chat', 'deepseek-coder'],
+                    description: '强大的中文代码和对话模型'
+                },
+                'glm': {
+                    name: 'GLM',
+                    models: ['glm-4', 'glm-3-turbo', 'glm-4v'],
+                    description: '智谱AI大模型，中文理解能力强'
+                },
+                'openai': {
+                    name: 'OpenAI',
+                    models: ['gpt-4', 'gpt-3.5-turbo'],
+                    description: 'OpenAI GPT模型'
+                },
+                'local': {
+                    name: 'Local Model',
+                    models: ['local-chat', 'local-coder'],
+                    description: '本地部署的模型'
+                }
+            };
+
+            const info = providerInfo[provider];
+            if (info) {
+                modelTitle.textContent = `${info.name} 模型`;
+                modelInfo.style.display = 'block';
+            } else {
+                modelInfo.style.display = 'none';
+            }
+        }
+
+        // 更新连接状态
+        function updateConnectionStatus(status) {
+            const statusElement = document.getElementById('connectionStatus');
+            const statusTexts = {
+                'disconnected': '🔌 未连接',
+                'connecting': '🔄 连接中...',
+                'connected': '✅ 已连接',
+                'error': '❌ 连接失败'
+            };
+
+            statusElement.className = `connection-status status-${status}`;
+            statusElement.textContent = statusTexts[status] || '🔌 未知状态';
+
+            isConnected = status === 'connected';
+            document.getElementById('messageInput').disabled = !isConnected;
+            document.getElementById('sendButton').disabled = !isConnected;
+        }
+
+        // API调用函数
+        async function callLLMAPI(message, provider = currentProvider) {
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        provider: provider,
+                        message: message,
+                        conversation_history: conversationHistory.slice(-5) // 保留最近5条消息
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                console.error('API调用错误:', error);
+                return {
+                    error: error.message,
+                    content: null
+                };
+            }
+        }
+
+        // 测试连接
+        async function testConnection() {
+            if (!currentProvider) {
+                alert('请先选择LLM提供商');
+                return;
+            }
+
+            updateConnectionStatus('connecting');
+            addMessage('system', `🔗 正在测试 ${currentProvider} API 连接...`);
+
+            try {
+                const result = await callLLMAPI('你好，这是一条连接测试消息。', currentProvider);
+
+                if (result.error) {
+                    updateConnectionStatus('error');
+                    addMessage('system', `❌ ${currentProvider} 连接失败: ${result.error}`);
+                } else {
+                    updateConnectionStatus('connected');
+                    addMessage('system', `✅ ${currentProvider} 连接成功！`);
+                    updateStats(result);
+                }
+            } catch (error) {
+                updateConnectionStatus('error');
+                addMessage('system', `❌ 连接测试异常: ${error.message}`);
+            }
+        }
+
+        // 测试推理
+        async function testReasoning() {
+            if (!isConnected) {
+                alert('请先测试API连接');
+                return;
+            }
+
+            addMessage('user', '如果一个房间里有3只猫，又来了2只猫，现在房间里有多少只猫？');
+
+            const result = await callLLMAPI('如果一个房间里有3只猫，又来了2只猫，现在房间里有多少只猫？', currentProvider);
+
+            if (result.content) {
+                addMessage('assistant', result.content, result);
+            } else {
+                addMessage('system', `推理测试失败: ${result.error}`);
+            }
+        }
+
+        // 测试代码生成
+        async function testCodeGeneration() {
+            if (!isConnected) {
+                alert('请先测试API连接');
+                return;
+            }
+
+            addMessage('user', '请用Python写一个计算斐波那契数列的函数。');
+
+            const result = await callLLMAPI('请用Python写一个计算斐波那契数列的函数。', currentProvider);
+
+            if (result.content) {
+                addMessage('assistant', result.content, result);
+            } else {
+                addMessage('system', `代码生成测试失败: ${result.error}`);
+            }
+        }
+
+        // 测试对话
+        async function testConversation() {
+            if (!isConnected) {
+                alert('请先测试API连接');
+                return;
+            }
+
+            addMessage('user', '你好！请简单介绍一下你自己。');
+
+            const result = await callLLMAPI('你好！请简单介绍一下你自己。', currentProvider);
+
+            if (result.content) {
+                addMessage('assistant', result.content, result);
+            } else {
+                addMessage('system', `对话测试失败: ${result.error}`);
+            }
+        }
+
+        // 发送消息
+        async function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+
+            if (!message || !currentProvider || !isConnected) {
+                return;
+            }
+
+            // 禁用输入
+            input.disabled = true;
+            document.getElementById('sendButton').disabled = true;
+            document.getElementById('sendButtonText').style.display = 'none';
+            document.getElementById('sendLoading').style.display = 'inline-block';
+
+            // 添加用户消息
+            addMessage('user', message);
+
+            // 调用API
+            const result = await callLLMAPI(message, currentProvider);
+
+            if (result.content) {
+                addMessage('assistant', result.content, result);
+                updateStats(result);
+            } else {
+                addMessage('system', `发送失败: ${result.error}`);
+            }
+
+            // 恢复输入
+            input.value = '';
+            input.disabled = false;
+            document.getElementById('sendButton').disabled = false;
+            document.getElementById('sendButtonText').style.display = 'inline';
+            document.getElementById('sendLoading').style.display = 'none';
+        }
+
+        // 添加消息到聊天区域
+        function addMessage(role, content, metadata = null) {
+            const messagesContainer = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${role}`;
+
+            const time = new Date().toLocaleTimeString('zh-CN');
+
+            let infoHtml = '';
+            if (role === 'assistant' && metadata) {
+                infoHtml = `
+                    <span>🤖 ${currentProvider.toUpperCase()}</span>
+                    <span>${time}</span>
+                    ${metadata.response_time ? `<span class="response-time">⏱️ ${metadata.response_time}s</span>` : ''}
+                `;
+            } else if (role === 'user') {
+                infoHtml = `
+                    <span>👤 用户</span>
+                    <span>${time}</span>
+                `;
+            } else {
+                infoHtml = `
+                    <span>🔔 系统</span>
+                    <span>${time}</span>
+                `;
+            }
+
+            messageDiv.innerHTML = `
+                <div class="message-info">${infoHtml}</div>
+                <div class="message-content">${content}</div>
+            `;
+
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+            // 更新对话历史
+            if (role === 'user' || role === 'assistant') {
+                conversationHistory.push({ role, content });
+            }
+        }
+
+        // 更新统计信息
+        function updateStats(metadata) {
+            if (metadata && metadata.response_time) {
+                document.getElementById('responseTime').textContent = metadata.response_time.toFixed(2);
+            }
+
+            if (metadata && metadata.usage && metadata.usage.total_tokens) {
+                document.getElementById('totalTokens').textContent = metadata.usage.total_tokens;
+            }
+        }
+
+        // 清空对话
+        function clearChat() {
+            if (confirm('确定要清空所有对话记录吗？')) {
+                document.getElementById('chatMessages').innerHTML = '';
+                conversationHistory = [];
+
+                // 重新显示欢迎消息
+                addMessage('assistant', '👋 对话已清空，有什么可以帮助您的吗？');
+            }
+        }
+
+        // 处理回车键发送
+        function handleKeyPress(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage();
+            }
+        }
+
+        // 页面加载时显示默认提供商信息
+        window.addEventListener('load', function() {
+            const defaultProvider = 'deepseek';
+            document.getElementById('providerSelect').value = defaultProvider;
+            switchProvider(defaultProvider);
+        });
+    </script>
+</body>
+</html>

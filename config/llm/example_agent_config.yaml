@@ -1,0 +1,350 @@
+# Agent LLM配置示例
+# 展示如何在Agent配置中集成LLM
+
+# S-Agent配置示例
+s_agent_example:
+  agent_id: "s_agent_002"
+  agent_type: "strategist"
+  name: "战略协调官-002"
+  description: "战略家，负责制定应急响应战略框架和决策指导"
+  system_message: |
+    我是战略协调官，负责在应急响应场景中制定战略框架。
+
+    主要职责：
+    1. 分析应急场景的整体情况和潜在影响
+    2. 制定应急响应的战略框架和优先级
+    3. 识别关键决策点和时间节点
+    4. 提供高层次的战略指导
+    5. 协调各专业领域的工作方向
+
+    工作原则：
+    - 全面考虑，注重系统性和整体性
+    - 突出重点，把握关键环节
+    - 科学决策，基于数据和分析
+    - 灵活应变，根据实际情况调整战略
+
+    请基于当前场景信息，提供战略层面的分析和建议。
+
+  # LLM配置
+  llm_config:
+    provider: "deepseek"
+    model: "deepseek-chat"
+    api_key: "${DEEPSEEK_API_KEY}"
+    api_base: "https://api.deepseek.com/v1"
+    temperature: 0.7
+    max_tokens: 4000
+    timeout: 30
+    retry_count: 3
+    capabilities:
+      - "text_generation"
+      - "analysis"
+      - "reasoning"
+      - "conversation"
+      - "code_generation"
+
+  # AutoGen配置
+  max_consecutive_auto_reply: 8
+  human_input_mode: "NEVER"
+  code_execution_config: {"use_docker": False}
+
+  # Agent能力
+  capabilities:
+    - "strategic_analysis"
+    - "scenario_assessment"
+    - "priority_setting"
+    - "decision_framework"
+    - "risk_assessment"
+    - "resource_coordination"
+
+  # 自定义配置
+  custom_config:
+    strategic_level: "high"
+    analysis_depth: "comprehensive"
+    decision_scope: "overall"
+    time_horizon: "long_term"
+    collaboration_mode: "leader"
+    llm_adapter_id: "s_agent_002_adapter"  # 自动生成的适配器ID
+
+# A-Agent配置示例
+a_agent_example:
+  agent_id: "a_agent_002"
+  agent_type: "awareness"
+  name: "态势感知专家-002"
+  description: "态势感知专家，负责分析现场态势和识别关键信息"
+  system_message: |
+    我是态势感知专家，负责实时监控和分析应急现场的态势变化。
+
+    主要职责：
+    1. 收集和分析多源态势数据
+    2. 识别态势变化趋势和异常模式
+    3. 提取关键信息节点和决策要点
+    4. 生成态势分析报告和风险评估
+    5. 提供实时态势监控和预警
+
+    监控重点：
+    - 现场环境变化
+    - 资源状态和可用性
+    - 人员安全状况
+    - 潜在风险和威胁
+    - 应急响应进展
+
+    分析方法：
+    - 多数据源融合分析
+    - 时序变化模式识别
+    - 关键指标监控
+    - 异常检测和预警
+    - 趋势预测和推断
+
+    请基于实时数据，提供准确的态势感知和分析结果。
+
+  llm_config:
+    provider: "deepseek"
+    model: "deepseek-chat"
+    api_key: "${DEEPSEEK_API_KEY}"
+    api_base: "https://api.deepseek.com/v1"
+    temperature: 0.5
+    max_tokens: 4000
+    timeout: 20
+    retry_count: 3
+
+  capabilities:
+    - "situation_monitoring"
+    - "data_analysis"
+    - "pattern_recognition"
+    - "risk_identification"
+    - "trend_analysis"
+    - "anomaly_detection"
+
+  custom_config:
+    data_sources: ["sensors", "reports", "imagery"]
+    analysis_frequency: "real_time"
+    alert_threshold: "medium"
+    monitoring_scope: "comprehensive"
+
+# F-Agent配置示例
+f_agent_example:
+  agent_id: "f_agent_002"
+  agent_type: "field_expert"
+  name: "领域专家-002"
+  description: "领域专家，负责提供专业领域的知识支持和技术指导"
+  system_message: |
+    我是领域专家，负责提供专业领域的深度知识支持和技术指导。
+
+    专业领域：
+    - 水利工程与防洪
+    - 地质灾害与地震
+    - 气象与气候
+    - 环境保护
+    - 公共卫生
+    - 基础设施
+    - 应急救援
+
+    主要职责：
+    1. 提供专业风险评估
+    2. 制定技术解决方案
+    3. 支撑决策的专业依据
+    4. 技术标准和规范
+    5. 专业术语解释和指导
+
+    分析方法：
+    - 专业模型计算
+    - 经验案例分析
+    - 技术标准应用
+    - 专家系统推理
+    - 多学科综合分析
+
+    请基于我的专业知识，为应急响应提供准确的专业建议。
+
+  llm_config:
+    provider: "deepseek"
+    model: "deepseek-coder"
+    api_key: "${DEEPSEEK_API_KEY}"
+    api_base: "https://api.deepseek.com/v1"
+    temperature: 0.3
+    max_tokens: 4096
+    timeout: 30
+    retry_count: 3
+
+  capabilities:
+    - "expertise_analysis"
+    - "technical_advice"
+    - "risk_assessment"
+    - "standard_application"
+    - "expert_system"
+    - "disciplinary_knowledge"
+
+  custom_config:
+    expertise_domains: ["general", "hydraulic", "geological", "environmental"]
+    analysis_method: "expert_system"
+    confidence_level: "high"
+    reference_standards: True
+
+# E-Agent配置示例
+e_agent_example:
+  agent_id: "e_agent_002"
+  agent_type: "executor"
+  name: "执行协调官-002"
+  description: "执行协调官，负责将战略转化为可执行的行动计划"
+  system_message: |
+    我是执行协调官，负责将高层战略转化为具体的行动计划。
+
+    主要职责：
+    1. 接收和理解战略指导
+    2. 制定详细的执行计划
+    3. 分配资源和任务
+    4. 制定时间表和里程碑
+    5. 监控执行过程和调整
+
+    工作流程：
+    1. 战略解读：深入理解战略意图和要求
+    2. 方案制定：设计具体可行的执行方案
+    3. 资源配置：合理分配人力、物力、财力
+    4. 时间规划：制定详细的时间节点和里程碑
+    5. 任务分解：将复杂任务分解为可执行单元
+    6. 过程监控：跟踪执行进度和效果
+
+    输出格式：
+    - 执行计划（时间表、任务清单）
+    - 资源配置方案
+    - 风险控制措施
+    - 质量检查标准
+    - 进度监控指标
+
+    请基于战略指导，制定科学合理的执行方案。
+
+  llm_config:
+    provider: "deepseek"
+    model: "deepseek-chat"
+    api_key: "${DEEPSEEK_API_KEY}"
+    api_base: "https://api.deepseek.com/v1"
+    temperature: 0.5
+    max_tokens: 4000
+    timeout: 20
+    retry_count: 3
+
+  capabilities:
+    - "execution_planning"
+    - "resource_allocation"
+    - "task_decomposition"
+    - "time_management"
+    - "progress_monitoring"
+    - "quality_control"
+
+  custom_config:
+    planning_horizon: "short_term"
+    granularity: "detailed"
+    resource_optimization: True
+    monitoring_frequency: "regular"
+
+# 多模型切换配置示例
+multi_provider_example:
+  agent_id: "flexible_agent_001"
+  agent_type: "strategist"
+  name: "灵活智能体"
+  description: "支持多模型切换的智能体"
+
+  # 默认使用DeepSeek
+  llm_config:
+    provider: "deepseek"
+    model: "deepseek-chat"
+    api_key: "${DEEPSEEK_API_KEY}"
+
+  # 备用模型配置
+  backup_configs:
+    openai_fallback:
+      provider: "openai"
+      model: "gpt-4-turbo"
+      api_key: "${OPENAI_API_KEY}"
+    local_fallback:
+      provider: "local"
+      model: "local-chat"
+      api_base: "http://localhost:8080/v1"
+
+  custom_config:
+    # 模型选择策略
+    model_selection_strategy: "cost_optimized"  # options: "cost_optimized", "quality_first", "speed_first"
+    fallback_enabled: true
+    provider_preferences:
+      code_generation: ["deepseek", "openai"]
+      conversation: ["deepseek", "openai", "local"]
+      analysis: ["deepseek", "openai", "local"]
+
+# 模型性能优化配置
+performance_optimized:
+  agent_id: "performance_agent_001"
+  agent_type: "strategist"
+  name: "性能优化智能体"
+
+  llm_config:
+    provider: "deepseek"
+    model: "deepseek-chat"
+    api_key: "${DEEPSEEK_API_KEY}"
+    temperature: 0.3
+    max_tokens: 2000  # 减少token数量以提高速度
+    timeout: 15  # 减少超时时间
+
+  custom_config:
+    # 缓存配置
+    enable_response_cache: true
+    cache_ttl: 300  # 5分钟
+    cache_size_limit: 100
+
+    # 并发配置
+    max_concurrent_requests: 3
+    request_timeout: 10
+
+    # 批处理优化
+    batch_processing: true
+    batch_size: 5
+# GLM Agent配置示例
+glm_agent_example:
+  agent_id: "glm_agent_001"
+  agent_type: "assistant"
+  name: "GLM智能助手"
+  description: "基于智谱AI GLM-4模型的智能助手，具备强大的中文理解和生成能力"
+  system_message: |
+    你是一个基于智谱AI GLM-4模型的智能助手。你具有以下特点：
+    1. 强大的中文理解和生成能力
+    2. 支持代码生成和分析
+    3. 具备逻辑推理和数据分析能力
+    4. 支持函数调用和工具使用
+    5. 可以进行多轮对话和上下文理解
+    
+    请根据用户的需求提供准确、有帮助的回答。
+  llm_config:
+    provider: "glm"
+    model: "glm-4"
+    api_base: "https://open.bigmodel.cn/api/paas/v4"
+    api_key: "${GLM_API_KEY}"
+    temperature: 0.7
+    max_tokens: 8192
+    timeout: 60
+    retry_count: 3
+    response_format: "text"
+    capabilities:
+      - "text_generation"
+      - "conversation"
+      - "code_generation"
+      - "analysis"
+      - "reasoning"
+      - "function_calling"
+      - "tool_calling"
+      - "json_mode"
+      - "streaming"
+    fallback_providers:
+      - "openai"
+      - "deepseek"
+  capabilities:
+    - "text_generation"
+    - "conversation"
+    - "code_generation"
+    - "analysis"
+    - "reasoning"
+    - "function_calling"
+    - "tool_calling"
+  tools: []
+  workflow_settings:
+    max_turns: 20
+    thinking_mode: true
+    auto_execution: false
+

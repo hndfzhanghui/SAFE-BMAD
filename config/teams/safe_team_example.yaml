@@ -1,0 +1,110 @@
+# SAFE团队示例配置
+team_name: "emergency_response_team_001"
+team_description: "标准SAFE应急响应团队示例"
+team_type: "emergency_response"
+
+# 团队成员配置
+agents:
+  s_agent:
+    template: "s_agent"
+    agent_id: "s_agent_001"
+    name: "战略协调官-001"
+    description: "负责战略制定和决策指导"
+    capabilities:
+      - "strategic_analysis"
+      - "scenario_assessment"
+      - "priority_setting"
+    custom_config:
+      strategic_level: "high"
+      collaboration_mode: "leader"
+
+  a_agent:
+    template: "a_agent"
+    agent_id: "a_agent_001"
+    name: "态势感知专家-001"
+    description: "负责态势监控和分析"
+    capabilities:
+      - "situation_monitoring"
+      - "data_analysis"
+      - "pattern_recognition"
+      - "anomaly_detection"
+    custom_config:
+      data_sources: ["sensors", "reports", "imagery"]
+      analysis_frequency: "real_time"
+      alert_threshold: "medium"
+
+  f_agent:
+    template: "f_agent"
+    agent_id: "f_agent_001"
+    name: "领域专家-001"
+    description: "提供专业技术支持"
+    capabilities:
+      - "expertise_analysis"
+      - "technical_advice"
+      - "risk_assessment"
+      - "standard_application"
+    custom_config:
+      expertise_domains: ["hydraulic", "geological", "environmental"]
+      confidence_level: "high"
+
+  e_agent:
+    template: "e_agent"
+    agent_id: "e_agent_001"
+    name: "执行协调官-001"
+    description: "负责执行计划和资源协调"
+    capabilities:
+      - "execution_planning"
+      - "resource_allocation"
+      - "task_decomposition"
+      - "progress_monitoring"
+    custom_config:
+      planning_horizon: "short_term"
+      granularity: "detailed"
+
+# 通信配置
+communication_config:
+  protocol: "safe_messaging"
+  transport: "in_memory"
+  broadcast_enabled: true
+  message_timeout: 30
+  retry_attempts: 3
+
+# 协作配置
+collaboration_config:
+  coordination_mode: "sequential"  # sequential, parallel, hybrid
+  decision_making: "consensus"      # consensus, majority, leader
+  conflict_resolution: "escalation" # escalation, voting, negotiation
+  sync_frequency: 5                # 秒
+
+# 性能配置
+performance_config:
+  max_concurrent_tasks: 10
+  task_timeout: 300                # 秒
+  health_check_interval: 30        # 秒
+  resource_limits:
+    memory_mb: 512
+    cpu_percent: 50
+
+# 工作流配置
+workflow_config:
+  default_workflow: "emergency_response"
+  auto_start: true
+  step_timeout: 60
+  max_steps: 50
+
+# 监控配置
+monitoring_config:
+  enabled: true
+  metrics_collection: true
+  performance_tracking: true
+  logging_level: "INFO"
+  alert_rules:
+    - metric: "error_rate"
+      threshold: 0.1
+      operator: ">"
+    - metric: "response_time"
+      threshold: 30
+      operator: ">"
+    - metric: "task_failure_rate"
+      threshold: 0.05
+      operator: ">"
