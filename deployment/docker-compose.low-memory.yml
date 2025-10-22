@@ -1,0 +1,82 @@
+version: '3.8'
+
+services:
+  # Redis (轻量级版本)
+  redis:
+    image: redis:7-alpine
+    container_name: safe-bmad-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru
+    mem_limit: 256m
+    volumes:
+      - redis_data:/data
+    networks:
+      - safe-bmad-network
+
+  # PostgreSQL (内存优化配置)
+  postgres:
+    image: postgres:15-alpine
+    container_name: safe-bmad-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: safe_bmad
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-your_password}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./config/postgresql/optimised.conf:/etc/postgresql/postgresql.conf
+    command: postgres -c config_file=/etc/postgresql/postgresql.conf
+    mem_limit: 512m
+    networks:
+      - safe-bmad-network
+
+  # 后端API服务
+  backend:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    container_name: safe-bmad-backend
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD:-your_password}@postgres:5432/safe_bmad
+      - REDIS_URL=redis://redis:6379
+      - AUTOGEN_MAX_CONCURRENT_AGENTS=1
+      - AUTOGEN_TIMEOUT=30
+    ports:
+      - "3000:3000"
+    depends_on:
+      - postgres
+      - redis
+    mem_limit: 512m
+    volumes:
+      - ../logs:/app/logs
+    networks:
+      - safe-bmad-network
+
+  # 前端服务
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+    container_name: safe-bmad-frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    mem_limit: 256m
+    networks:
+      - safe-bmad-network
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  safe-bmad-network:
+    driver: bridge
