@@ -4,7 +4,8 @@ Application Settings Configuration for SAFE-BMAD System
 
 import os
 from typing import List, Optional
-from pydantic import BaseSettings, validator
+from pydantic import validator
+from pydantic_settings import BaseSettings
 import logging
 
 logger = logging.getLogger(__name__)
@@ -91,10 +92,12 @@ class Settings(BaseSettings):
     vite_app_title: str = "S3DA2 - SAFE BMAD System"
     vite_app_version: str = "1.0.0"
 
-    class Config:
-        env_file = ".env"
-        env_file_encoding = "utf-8"
-        case_sensitive = False
+    model_config = {
+        "env_file": ".env",
+        "env_file_encoding": "utf-8",
+        "case_sensitive": False,
+        "extra": "ignore"
+    }
 
     @validator("environment")
     def validate_environment(cls, v):

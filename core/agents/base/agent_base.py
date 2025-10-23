@@ -758,13 +758,23 @@ def _build_analysis_prompt(self, data: Dict[str, Any], context: Optional[Collabo
 
     base_prompt = agent_type_prompts.get(self.agent_type, "请分析以下信息")
 
+    # 构建数据内容
+    data_content = json.dumps(data, ensure_ascii=False, indent=2, ensure_cns=False)
+
+    # 构建上下文信息
+    context_content = ""
+    if context:
+        context_dict = self._context_to_dict(context)
+        context_json = json.dumps(context_dict, ensure_ascii=False, indent=2, ensure_cns=False)
+        context_content = f"上下文信息：\n{context_json}"
+
     prompt = f"""
 {base_prompt}。
 
 数据内容：
-{json.dumps(data, ensure_ascii=False, indent=2, ensure_cns=False)}
+{data_content}
 
-{f'上下文信息：\n{json.dumps(self._context_to_dict(context), ensure_ascii=False, indent=2, ensure_cns=False)}' if context else ''}
+{context_content}
 
 请提供：
 1. 详细的分析结果

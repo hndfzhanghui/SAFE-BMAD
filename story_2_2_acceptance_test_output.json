@@ -1,0 +1,173 @@
+{
+  "metadata": {
+    "output_id": "ACC_TEST_OUT_20251022_201722",
+    "version": "1.0",
+    "generated_at": "2025-10-22T20:17:22.289077",
+    "scenario_id": "ACC_TEST_FLOOD_001",
+    "classification": "restricted"
+  },
+  "scenario_summary": {
+    "event_type": "flood",
+    "severity_level": "high",
+    "population_affected": 15000,
+    "location": {
+      "description": "某市中心商业区",
+      "coordinates": {
+        "lat": 39.9042,
+        "lng": 116.4074
+      },
+      "affected_regions": [
+        "东区",
+        "西区",
+        "南区",
+        "北区"
+      ]
+    },
+    "key_risk_factors": [
+      {
+        "type": "drowning",
+        "level": 4,
+        "description": "深水区域存在严重溺水风险"
+      },
+      {
+        "type": "infrastructure_collapse",
+        "level": 4,
+        "description": "建筑物结构可能因水压倒塌"
+      },
+      {
+        "type": "disease_outbreak",
+        "level": 3,
+        "description": "污水混合可能导致疫情爆发"
+      }
+    ]
+  },
+  "strategic_framework": {
+    "framework_id": "FW_20251022_201722",
+    "scenario_id": "ACC_TEST_FLOOD_001",
+    "generated_at": "2025-10-22T20:17:22.289066",
+    "strategic_goals": [
+      {
+        "goal_id": "GOAL_ACC_TEST_FLOOD_001_001",
+        "title": "生命安全保障",
+        "description": "确保受影响人员的生命安全，实施紧急救援",
+        "level": "immediate",
+        "priority": 10,
+        "success_criteria": [
+          "伤亡人数最小化",
+          "救援成功率>95%"
+        ]
+      },
+      {
+        "goal_id": "GOAL_ACC_TEST_FLOOD_001_002",
+        "title": "洪水控制",
+        "description": "控制洪水蔓延，降低水位",
+        "level": "short_term",
+        "priority": 9,
+        "success_criteria": [
+          "水位下降至安全水平",
+          "防止二次灾害"
+        ]
+      },
+      {
+        "goal_id": "GOAL_ACC_TEST_FLOOD_001_003",
+        "title": "基础设施保护",
+        "description": "保护关键基础设施，确保基本服务",
+        "level": "short_term",
+        "priority": 8,
+        "success_criteria": [
+          "关键设施正常运行",
+          "基本服务保障"
+        ]
+      }
+    ],
+    "decision_points": [
+      {
+        "decision_id": "DEC_ACC_TEST_FLOOD_001_001",
+        "title": "人员疏散决策",
+        "description": "是否以及如何组织人员疏散",
+        "critical_time": "2025-10-22T20:17:22.289035",
+        "recommended_option": 1,
+        "decision_criteria": [
+          "人员安全",
+          "疏散时间",
+          "资源可用性"
+        ]
+      }
+    ],
+    "action_priorities": [],
+    "success_metrics": {
+      "life_safety_metrics": {
+        "casualty_rate": "< 1%"
+      },
+      "operational_metrics": {
+        "response_time": "< 15 minutes"
+      }
+    },
+    "resource_allocation": {
+      "personnel_allocation": {
+        "life_safety": "40%"
+      },
+      "budget_allocation": {
+        "immediate_response": "60%"
+      }
+    }
+  },
+  "recommendations": [
+    {
+      "type": "immediate",
+      "description": "立即启动生命安全保障行动",
+      "priority": "critical",
+      "justification": "场景严重程度高，人员安全为首要考虑"
+    },
+    {
+      "type": "coordination",
+      "description": "建立统一的应急指挥协调机制",
+      "priority": "high",
+      "justification": "多部门协作需要有效协调"
+    },
+    {
+      "type": "resource",
+      "description": "调配必要的救援设备和人员",
+      "priority": "high",
+      "justification": "当前资源可能不足以应对大规模灾害"
+    }
+  ],
+  "execution_plan": {
+    "phases": [
+      {
+        "phase_id": "PHASE_1",
+        "phase_name": "紧急响应",
+        "start_time": "T+0H",
+        "objectives": [
+          "控制事态发展",
+          "保障生命安全",
+          "建立指挥体系"
+        ],
+        "estimated_duration": "2 hours"
+      },
+      {
+        "phase_id": "PHASE_2",
+        "phase_name": "扩展救援",
+        "start_time": "T+2H",
+        "objectives": [
+          "扩大救援范围",
+          "基础设施保护",
+          "医疗救护"
+        ],
+        "estimated_duration": "4 hours"
+      }
+    ],
+    "total_duration": "T+6H",
+    "critical_path": [
+      "生命安全保障",
+      "洪水控制",
+      "基础设施保护"
+    ]
+  },
+  "quality_metrics": {
+    "coverage_score": 85.0,
+    "feasibility_score": 80.0,
+    "coordination_score": 75.0,
+    "overall_quality_score": 80.0
+  }
+}

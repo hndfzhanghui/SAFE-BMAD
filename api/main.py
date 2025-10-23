@@ -5,7 +5,8 @@ S3DA2 - SAFE BMAD System with S-A-F-E-R Agent Framework
 
 from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
+from fastapi.staticfiles import StaticFiles
 import os
 import sys
 import logging
@@ -47,6 +48,9 @@ app.add_middleware(
     allow_methods=settings.cors_allow_methods,
     allow_headers=settings.cors_allow_headers,
 )
+
+# Static files serving
+app.mount("/static", StaticFiles(directory="."), name="static")
 
 # Health check endpoints
 @app.get("/health", tags=["Health"])
@@ -146,6 +150,16 @@ async def check_redis_health():
             "details": "Redis connection failed"
         }
 
+# Demo page endpoint
+@app.get("/demo.html", tags=["Demo"])
+async def demo_page():
+    """Serve the demo HTML page"""
+    demo_path = os.path.join(os.path.dirname(__file__), "unified_demo.html")
+    if os.path.exists(demo_path):
+        return FileResponse(demo_path)
+    else:
+        raise HTTPException(status_code=404, detail="Demo page not found")
+
 # Root endpoint
 @app.get("/", tags=["Root"])
 async def root():
@@ -156,6 +170,10 @@ async def root():
         "documentation": {
             "swagger": "/docs",
             "redoc": "/redoc"
+        },
+        "demo": {
+            "demo_page": "/demo.html",
+            "description": "Interactive demo page with API testing"
         },
         "health_checks": {
             "health": "/health",
